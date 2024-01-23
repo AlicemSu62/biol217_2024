@@ -21,10 +21,16 @@
 damit ich ins caucluster komme
   ssh -X sunam238@caucluster.rz.uni-kiel.de
 
-# Task: How to add links and images to the end file
+### Task: How to add links and images to the end file
 
+-------
+
+# Day 2
 
 ##  code for Sequencing files
+
+zuerst muss gesagt werden, was der Umstand für das Programmieren ist. Wir haben in dem Fall jetzt sequence files, 6 Stück insgesamt, 3 davon sind normal und 3 davon reversed reads. Am Ende ergeben 1 normal read und ein reversed read paired end readfiles. Die Files habe den Datentypen fastq.gz.
+Mit fastqc (qc für QualityControl) verwirklicht man eine Visualisierung der fastq Dateien. HTMLs werden ausgegeben, die man dann in einen Internetbrowser kopieren kann und die visualisierte Datei sieht. 
 ```
 #!/bin/bash
 #SBATCH --nodes=1
@@ -60,6 +66,8 @@ Die html s auf den eigenen PC kopieren, dafür einfach neues Terminal-Fenster ö
 
 scp sunam238@caucluster.rz.uni-kiel.de:/work_beegfs/suname238/Metagenomics/1_fastqc/*.html.
 ```
+Mit fastp cleaned man die reads und gibt neuen input
+
 ```
 #!/bin/bash
 #SBATCH --nodes=1
