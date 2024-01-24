@@ -211,3 +211,32 @@ bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130305_mapped_R1
 bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130527_mapped_R1_clean.fastq.gz -2 ../2_fastp/BGR_130527_mapped_R2_clean.fastq.gz -S map130527.sam
 
 bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130708_mapped_R1_clean.fastq.gz -2 ../2_fastp/BGR_130708_mapped_R2_clean.fastq.gz -S map130708.sam
+
+
+-----
+module load samtools
+samtools view -bS ? > bam_file.bam
+
+-------- 
+Contigs data preparation
+------
+
+cd /work_beegfs/sunam238/Metagenomics/3_coassembly/
+
+
+anvi-gen-contigs-database -f contigs.anvio.fa -o contigs.db -n 'biol217'
+
+
+anvi-run-hmms -c contigs.db
+
+
+srun --reservation=biol217 --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --nodelist=node002 /bin/bash
+
+---
+------
+----
+for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done
+
+
+anvi-profile -i ? -c ? --output-dir ?
+----
