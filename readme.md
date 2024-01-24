@@ -126,3 +126,28 @@ cd /work_beegfs/sunam238/Metagenomics/2_fastp
                                        
 megahit -1 GR_130305_mapped_R1.fastq.gz -1 BGR_130527_mapped_R1.fastq.gz -1 BGR_130708_mapped_R1.fastq.gz -2 GR_130305_mapped_R2.fastq.gz -2 BGR_130527_mapped_R2.fastq.gz -2 BGR_130708_mapped_R2.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 -o ../3_coassembly -t 12 
 ```
+Day 3
+
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=fastp
+#SBATCH --output=fastp.out
+#SBATCH --error=fastp.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics
+
+metaquast -t 6 -o ./3_metaquast -m 1000 ./3_coassembly/final.contigs.fa
+
+----
+danach ein zweites Fenster im Terminal öffnen und mit dem stu-Account den Befehl eingeben zum Kopieren (scp=):
+----
+scp sunam238@caucluster.rz.uni-kiel.de:/work_beegfs/sunam238/Metagenomics/3_metaquast/report.html .
