@@ -180,7 +180,7 @@ squeue -u sunam238
 
 ----------
 
-!/bin/bash
+#!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=10G
@@ -240,3 +240,43 @@ for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done
 
 anvi-profile -i ? -c ? --output-dir ?
 ----
+
+Day 4
+
+cd /workbeegfs/Metagenomics/3_coassembly
+
+module load samtools
+
+for i in *.sam; do samtools view -bS $i > "$i".bam; done
+
+dieser Schritt war erforderlich, um aus den sam-Dateitypen (sequence mapping file) einen bam-Dateitypen (binary alignment file) zu machen.
+
+-----
+
+Fortsetzung von dem letzten Command von Day3.
+Eine File wurde heruntergeladen -> contigs.db darin sind die contigs enthalten
+
+srun --reservation=biol217 --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --nodelist=node002 /bin/bash 
+
+Danach:
+
+Muss ich auf anvio interactive zugreifen
+anvio interactive brauch ich jedes einzelne Mal
+ich muss immer die gleichen Schritte gehen
+Ich muss die command line, die ich im interactive mode runnen möchte, replacen 
+Das folgende Skript dient zur Visualisierung unserer Dateien.
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-display-contigs-stats contigs.db
+(Dieser command ist abhängig davon, was man im interactive mode runnen möchte und muss demnach geändert bleiben. Der Rest des Skriptes ist fix und kann für andere Visualisierungen verwendet werden.)
+
+Neues Terminal öffnen!
+
+ssh -L 8060:localhost:8080 sunam###@caucluster-old.rz.uni-kiel.de
+ssh -L 8080:localhost:8080 node###
+
+Internetbrowser öffnen und folgendes kopieren: 
+http://127.0.0.1:8060 oder http://127.0.0.1:8080
