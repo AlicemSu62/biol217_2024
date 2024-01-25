@@ -371,7 +371,7 @@ conda activate anvio-8
 
 cd /work_beegfs/sunam238/Metagenomics/
 
-anvi-merge /5_anvio_profiles/profiling/map130305/PROFILE.db /5_anvio_profiles/profiling/map130305/PROFILE.db /5_anvio_profiles/profiling/map130708/PROFILE.db -o /5_anvio_profiles/profiling/merged_profiles -c /3_coassembly/contigs.db --enforce-hierarchical-clustering 
+anvi-merge ./5_anvio_profiles/profiling/map130305/PROFILE.db ./5_anvio_profiles/profiling/map130305/PROFILE.db ./5_anvio_profiles/profiling/map130708/PROFILE.db -o ./5_anvio_profiles/profiling/merged_profiles -c ./3_coassembly/contigs.db --enforce-hierarchical-clustering 
 ```
 /5_anvio_profiles/profiling/map130305/
 /5_anvio_profiles/profiling/map130527/
