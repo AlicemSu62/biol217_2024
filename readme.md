@@ -378,15 +378,49 @@ anvi-merge /5_anvio_profiles/profiling/map130305/PROFILE.db /5_anvio_profiles/pr
 /5_anvio_profiles/profiling/map130708/
 
 
-danach kann mit dem Binning begonnen werden:
+# danach kann mit dem Binning begonnen werden:
 
 ```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=anvicluster
+#SBATCH --output=anvicluster.out
+#SBATCH --error=anvicluster.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics/
+
 anvi-cluster-contigs -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C METABAT --driver metabat2 --just-do-it --log-file log-metabat2
 
 anvi-summarize -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassemblycontigs.db -o SUMMARY_METABAT -C METABAT
 ```
 
 ```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=maxbin
+#SBATCH --output=maxbin.out
+#SBATCH --error=maxbin.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics/
+
 anvi-cluster-contigs -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
 
 anvi-summarize -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /coassembly/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
@@ -395,9 +429,62 @@ anvi-summarize -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /coassembly/co
 MAGs Quality Estimation
 
 ```
-anvi-estimate-genome-completeness -c /3_coassembly/contigs.db -p /PATH/TO/merged_profiles/PROFILE.db -C METABAT2
+anvi-estimate-genome-completeness -c /3_coassembly/contigs.db -p /5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT2
 ```
 
 ```
-anvi-estimate-genome-completeness -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db --list-collections
+anvi-estimate-genome-completeness -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db --list-collections
+```
+
+
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-interactive -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C YOUR_COLLECTION
+```
+
+
+# Day 5
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+```
+
+```
+anvi-summarize -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db --list-collections
+```
+```
+anvi-summarize -c /PATH/TO/contigs.db -p /PATH/TO/merged_profiles/profile.db -C METABAT2 -o SUMMARY_METABAT2 --just-do-it
+```
+
+```
+cd /PATH/TO/SUMMARY/bin_by_bin
+
+mkdir ../../ARCHAEA_BIN_REFINEMENT
+
+cp /PATH/TO/BIN_FOLDER_INFO_FROM_ERR_FILE/*.fa /PATH/TO/ARCHAEA_BIN_REFINEMENT/
+```
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate gunc
+```
+
+```
+cd /PATH/TO/ARCHAEA_BIN_REFINEMENT
+
+mkdir GUNC
+
+for i in *.fa; do gunc run -i ? -r /home/sunam226/Databases/gunc_db_progenomes2.1.dmnd --out_dir ? --threads 10 --detailed_output; done
+
+```
+
+```
+
 ```
