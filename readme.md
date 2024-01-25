@@ -309,13 +309,15 @@ module load miniconda3/4.12.0
 conda activate anvio-8
 
 
-cd work_beegfs/sunam238/Metagenomics/3_coassembly/
+cd /work_beegfs/sunam238/Metagenomics/3_coassembly/ -->
 
 
 
 
 for i in *.bam; do anvi-init-bam $i -o ../5_anvio_profiles/"$i".sorted.bam; done
 ```
+
+
 
 cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
 
@@ -324,9 +326,30 @@ anvi-profile -i anvio.bam -c ../3_coassembly/contigs.db --output-dir OUTPUT_DIR
 stattdessen das für jede Bam-File einzeln einzugeben, ist hier die For-Schleife:
 
 ```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=profiling
+#SBATCH --output=profiling.out
+#SBATCH --error=profiling.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
 cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
 
 mkdir /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling
 
 for i in `ls *.sorted.bam | cut -d "." -f 1`; do anvi-profile -i "$i".bam.sorted.bam -c ../3_coassembly/contigs.db -o /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/”$i”; done
+```
+
+nächster Schritt: Verschmelzen der Anvi-Profile von verschiedenen Smaples zu einem einzigen Profil:
+
+```
+anvi-merge /PATH/TO/SAMPLE1/PROFILE.db /PATH/TO/SAMPLE2/PROFILE.db /PATH/TO/SAMPLE3/PROFILE.db -o /PATH/TO/merged_profiles -c /PATH/TO/contigs.db --enforce-hierarchical-clustering 
 ```
