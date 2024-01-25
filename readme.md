@@ -286,6 +286,9 @@ ssh -L 8080:localhost:8080 node238
 Internetbrowser öffnen und folgendes kopieren: 
 http://127.0.0.1:8060 oder http://127.0.0.1:8080
 
+anvi-display-contigs-stats contigs.db
+(without srun, das klappt auch)
+
 ### Binning mit ANVI´O
 
 ANVI´O: ANalysis and Visualization platform for microbial ´Omics
@@ -348,8 +351,53 @@ mkdir /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling
 for i in `ls *.sorted.bam | cut -d "." -f 1`; do anvi-profile -i "$i".bam.sorted.bam -c ../3_coassembly/contigs.db -o /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/”$i”; done
 ```
 
-nächster Schritt: Verschmelzen der Anvi-Profile von verschiedenen Smaples zu einem einzigen Profil:
+nächster Schritt: Verschmelzen der Anvi-Profile von verschiedenen Samples zu einem einzigen Profil:
 
 ```
-anvi-merge /PATH/TO/SAMPLE1/PROFILE.db /PATH/TO/SAMPLE2/PROFILE.db /PATH/TO/SAMPLE3/PROFILE.db -o /PATH/TO/merged_profiles -c /PATH/TO/contigs.db --enforce-hierarchical-clustering 
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=anvimerge
+#SBATCH --output=anvimerge.out
+#SBATCH --error=anvimerge.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics/
+
+anvi-merge /5_anvio_profiles/profiling/map130305/PROFILE.db /5_anvio_profiles/profiling/map130305/PROFILE.db /5_anvio_profiles/profiling/map130708/PROFILE.db -o /5_anvio_profiles/profiling/merged_profiles -c /3_coassembly/contigs.db --enforce-hierarchical-clustering 
+```
+/5_anvio_profiles/profiling/map130305/
+/5_anvio_profiles/profiling/map130527/
+/5_anvio_profiles/profiling/map130708/
+
+
+danach kann mit dem Binning begonnen werden:
+
+```
+anvi-cluster-contigs -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C METABAT --driver metabat2 --just-do-it --log-file log-metabat2
+
+anvi-summarize -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassemblycontigs.db -o SUMMARY_METABAT -C METABAT
+```
+
+```
+anvi-cluster-contigs -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
+
+anvi-summarize -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /coassembly/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
+```
+
+MAGs Quality Estimation
+
+```
+anvi-estimate-genome-completeness -c /3_coassembly/contigs.db -p /PATH/TO/merged_profiles/PROFILE.db -C METABAT2
+```
+
+```
+anvi-estimate-genome-completeness -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db --list-collections
 ```
