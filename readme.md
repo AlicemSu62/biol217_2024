@@ -256,7 +256,9 @@ dieser Schritt war erforderlich, um aus den sam-Dateitypen (sequence mapping fil
 Fortsetzung von dem letzten Command von Day3.
 Eine File wurde heruntergeladen -> contigs.db darin sind die contigs enthalten
 
+```
 srun --reservation=biol217 --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --nodelist=node002 /bin/bash 
+```
 
 Danach:
 
@@ -266,11 +268,14 @@ ich muss immer die gleichen Schritte gehen
 Ich muss die command line, die ich im interactive mode runnen möchte, replacen 
 Das folgende Skript dient zur Visualisierung unserer Dateien.
 
+```
 module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
-
+```
+```
 anvi-display-contigs-stats contigs.db
+```
 (Dieser command ist abhängig davon, was man im interactive mode runnen möchte und muss demnach geändert bleiben. Der Rest des Skriptes ist fix und kann für andere Visualisierungen verwendet werden.)
 
 Neues Terminal öffnen!
