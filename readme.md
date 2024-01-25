@@ -317,3 +317,13 @@ cd work_beegfs/sunam238/Metagenomics/3_coassembly/
 for i in *.bam; do anvi-init-bam $i -o ../5_anvio_profiles/"$i".sorted.bam; done
 ```
 
+cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
+
+anvi-profile -i anvio.bam -c ../3_coassembly/contigs.db --output-dir OUTPUT_DIR
+
+stattdessen das für jede Bam-File einzeln einzugeben, ist hier die For-Schleife:
+
+```
+mkdir /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
+for i in `ls *.sorted.bam | cut -d "." -f 1`; do anvi-profile -i "$i".bam.sorted.bam -c contigs.db -o /work_beegfs/sunam238/Metagenomics/5_anvio_profiles”$i”; done
+```
