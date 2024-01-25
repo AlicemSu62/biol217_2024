@@ -280,8 +280,40 @@ anvi-display-contigs-stats contigs.db
 
 Neues Terminal öffnen!
 
-ssh -L 8060:localhost:8080 sunam###@caucluster-old.rz.uni-kiel.de
-ssh -L 8080:localhost:8080 node###
+ssh -L 8060:localhost:8080 sunam238@caucluster-old.rz.uni-kiel.de
+ssh -L 8080:localhost:8080 node238
 
 Internetbrowser öffnen und folgendes kopieren: 
 http://127.0.0.1:8060 oder http://127.0.0.1:8080
+
+### Binning mit ANVI´O
+
+ANVI´O: ANalysis and Visualization platform for microbial ´Omics
+
+Online-Tutorial, wenn ich verwirrt bin: https://merenlab.org/2016/06/22/anvio-tutorial-v2/
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=bowtie
+#SBATCH --output=bowtie.out
+#SBATCH --error=bowtie.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+
+cd work_beegfs/sunam238/Metagenomics/3_coassembly/
+
+
+
+
+for i in *.bam; do anvi-init-bam $i -o ../5_anvio_profiles/"$i".sorted.bam; done
+```
+
