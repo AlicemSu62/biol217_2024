@@ -398,9 +398,9 @@ conda activate anvio-8
 
 cd /work_beegfs/sunam238/Metagenomics/
 
-anvi-cluster-contigs -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C METABAT --driver metabat2 --just-do-it --log-file log-metabat2
+anvi-cluster-contigs -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C METABAT --driver metabat2 --just-do-it --log-file log-metabat2
 
-anvi-summarize -p /5_anvio_profiles/profiling/merged_profiles/PROFILE.db -c /3_coassemblycontigs.db -o SUMMARY_METABAT -C METABAT
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c /CC/4_mapping/contigs.db -o SUMMARY_METABAT -C METABAT
 ```
 
 ```
@@ -421,19 +421,19 @@ conda activate anvio-8
 
 cd /work_beegfs/sunam238/Metagenomics/
 
-anvi-cluster-contigs -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
+anvi-cluster-contigs -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
 
-anvi-summarize -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /coassembly/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
 ```
 
 MAGs Quality Estimation
 
 ```
-anvi-estimate-genome-completeness -c /3_coassembly/contigs.db -p /5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT2
+anvi-estimate-genome-completeness -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT2
 ```
 
 ```
-anvi-estimate-genome-completeness -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db --list-collections
+anvi-estimate-genome-completeness -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db --list-collections
 ```
 
 
@@ -443,7 +443,7 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
 
-anvi-interactive -p /5_anvio_profiles/merged_profiles/PROFILE.db -c /3_coassembly/contigs.db -C YOUR_COLLECTION
+anvi-interactive -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C YOUR_COLLECTION
 ```
 
 
