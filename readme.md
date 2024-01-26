@@ -471,9 +471,19 @@ anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_map
 
 anvi-summarize -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/profile.db -C METABAT2 -o SUMMARY_METABAT2 --just-do-it
 ```
+anvi-estimate-genome-completeness -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT > file
+
+(damit lässt man sich eine Tabelle ausgeben, jetzt müssen die Archeae rausgepickt werden)
 
 ```
-cd /PATH/TO/SUMMARY/bin_by_bin
+METABAT__23 | ARCHAEA
+METABAT__44 | ARCHAEA
+METABAT__1  | ARCHAEA 
+```
+
+
+```
+cd /CC/5_anvio_profiles/MAXBIN2/bin_by_bin
 
 mkdir ../../ARCHAEA_BIN_REFINEMENT
 
@@ -491,10 +501,123 @@ cd /PATH/TO/ARCHAEA_BIN_REFINEMENT
 
 mkdir GUNC
 
-for i in *.fa; do gunc run -i ? -r /home/sunam226/Databases/gunc_db_progenomes2.1.dmnd --out_dir ? --threads 10 --detailed_output; done
+for i in *.fa; do gunc run -i ? -r /home/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir ? --threads 10 --detailed_output; done
 
 ```
 
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db --list-collections
+
+anvi-summarize -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C BINSANITY -o ./CC/5_anvio_profiles/BINSANITY --just-do-it > binsanity_file.sh
+
+
+
 ```
+cd ./CC/5_anvio_profiles/SUMMARY_METABAT2/bin_by_bin
+
+mkdir ../../ARCHAEA_BIN_REFINEMENT
+
+cp METABAT_23/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
+cp METABAT_44/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
+cp METABAT_1/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
+```
+
+
+# GUNC
+
+```
+
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=gunc
+#SBATCH --output=gunc.out
+#SBATCH --error=gunc.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate gunc
+
+cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+
+
+mkdir GUNC
+
+gunc run -i METABAT__44-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__44 --threads 10 --detailed_output
+
+gunc run -i METABAT__23-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__23 --threads 10 --detailed_output
+
+gunc run -i METABAT__1-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__1 --threads 10 --detailed_output
+
+```
+
+
+```
+anvi-refine -c ./CC/4_mapping/contigs.db -C METABAT -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__44
+```
+
+
+
+gunc plot -d GUNC/METABAT__1/diamond_output/METABAT__1-contigs.diamond.progenomes_2.1.out -g GUNC/METABAT__1/gene_calls/gene_counts.json 
+
+
+
+
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=day5
+#SBATCH --output=day5.out
+#SBATCH --error=day5.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+
+anvi-run-scg-taxonomy -c ./CC/4_mapping/contigs.db -T 20 -P 2
+
+
+
+```
+
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=hope5
+#SBATCH --output=hope.out
+#SBATCH --error=hope.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd /work_beegfs/sunam238/Metagenomics/
+
+#CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+
+anvi-estimate-scg-taxonomy -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db --metagenome-mode --compute-scg-coverages --update-profile-db-with-taxonomy
+
+anvi-estimate-scg-taxonomy -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db --metagenome-mode --compute-scg-coverages --update-profile-db-with-taxonomy > temp.txt
+
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o ./CC/5_anvio_profiles/merged_profiles/SUMMARY_METABAT2 -C METABAT
+
+
 
 ```
