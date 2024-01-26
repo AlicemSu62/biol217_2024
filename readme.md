@@ -400,7 +400,7 @@ cd /work_beegfs/sunam238/Metagenomics/
 
 anvi-cluster-contigs -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C METABAT --driver metabat2 --just-do-it --log-file log-metabat2
 
-anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c /CC/4_mapping/contigs.db -o SUMMARY_METABAT -C METABAT
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o SUMMARY_METABAT -C METABAT
 ```
 
 ```
@@ -423,10 +423,10 @@ cd /work_beegfs/sunam238/Metagenomics/
 
 anvi-cluster-contigs -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
 
-anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o MAXBIN2 -C MAXBIN2
 ```
 
-MAGs Quality Estimation
+### MAGs Quality Estimation
 
 ```
 anvi-estimate-genome-completeness -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT2
@@ -447,19 +447,29 @@ anvi-interactive -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_m
 ```
 
 
-# Day 5
+# Day 4
 
 ```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=maxbin
+#SBATCH --output=maxbin.out
+#SBATCH --error=maxbin.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
 module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
-```
 
-```
-anvi-summarize -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db --list-collections
-```
-```
-anvi-summarize -c /PATH/TO/contigs.db -p /PATH/TO/merged_profiles/profile.db -C METABAT2 -o SUMMARY_METABAT2 --just-do-it
+cd /work_beegfs/sunam238/Metagenomics
+
+anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db --list-collections
+
+anvi-summarize -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/profile.db -C METABAT2 -o SUMMARY_METABAT2 --just-do-it
 ```
 
 ```
