@@ -621,3 +621,31 @@ anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_map
 
 
 ```
+
+
+
+# Day6
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=128G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=01_fastqc
+#SBATCH --output=01_fastqc.out
+#SBATCH --error=01_fastqc.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+micromamba activate 01_short_reads_qc
+
+
+# create new folder for output of qc 
+mkdir -p $WORK/genomics/1_short_reads_qc/1_fastqc_raw
+for i in $WORK/genomics/0_raw_reads_/short_reads/*.gz; do fastqc $i -o .$WORK/genomics/1_short_reads_qc/1_fastqc_raw -t 32; done
+
+jobinfo
+```
