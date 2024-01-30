@@ -769,10 +769,30 @@ do
     anvi-run-ncbi-cogs -c $g --num-threads 4
     anvi-scan-trnas -c $g --num-threads 4
     anvi-run-scg-taxonomy -c $g --num-threads 4
+donecd $WORK/pangenomics_test/V_jascida_genomes/
+
+ls *fasta | awk 'BEGIN{FS="_"}{print $1}' > genomes.txt
+
+# remove all contigs <2500 nt
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-script-reformat-fasta ${g}_scaffolds.fasta \
+                               --min-len 2500 \
+                               --simplify-names \
+                               -o ${g}_scaffolds_2.5K.fasta
 done
 
-```
-
+# generate contigs.db
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-gen-contigs-database -f ${g}_scaffolds_2.5K.fasta \
+                              -o V_
 
 ## Dann können die contigs.db visualisiert werden
 
@@ -785,13 +805,15 @@ conda activate anvio-8
 
 anvi-display-contigs-stats $WORK/pangenomics_test/V_jascida_genomes/*db
 ```
+Randbemerkung: Die unteren Schritte wurden nicht ausgeführt
+
 
 ```
 srun --reservation=biol217 --pty --mem=16G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
 
 module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
-conda activate anvio-8_biol217
+conda activate anvio-8
 anvi-display-contigs-stats $WORK/pangenomics_test/V_jascida_genomes/*db
 ```
 ### in einem neuen Terminal dann 
@@ -802,3 +824,141 @@ ssh -L 8060:localhost:8080 sunam238@caucluster.rz.uni-kiel.de
 ssh -L 8080:localhost:8080 n100
 ```
 
+### weitere genomes Dateien keieren
+
+```
+cd $WORK/pangenomics_test/V_jascida_genomes
+anvi-script-gen-genomes-file --input-dir . -o ./external-genomes.txt
+```
+
+## weiterhin muss auf Kontamination geprüft werden
+
+```
+cd $WORK/pangenomics_testV_jascida_genomes
+anvi-estimate-genome-completeness -e external-genomes.txt
+```
+
+# jetzt müssen die Contigs für das Refinement visualisiert werden:
+
+```
+cd $WORK/pangenomics_test/V-jascida_genomes/
+anvi-profile -c V_jascida_52.db \
+             --sample-name V_jascida_52 \
+             --output-dir V_jascida_52 \
+             --blank
+```
+
+create bin V_jascida_52_CLEAN and store it as default
+
+```
+srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-interactive -c V_jascida_52.db \
+                 -p V_jascida_52/PROFILE.db
+```
+
+Splitting the genome in our good bins
+
+```# Here are the files you created
+#V_jascida_52_SPLIT/V_jascida_52_CLEAN/CONTIGS.db
+anvi-split -p V_jascida_52/PROFILE.db \
+           -c V_jascida_52.db \
+           -C default \
+           -o V_jascida_52_SPLIT
+
+
+
+sed 's/V_jascida_52.db/V_jascida_52_SPLIT\/V_jascida_52_CLEAN\/CONTIGS.db/g' external-genomes.txt > external-genomes-final.txt
+```
+
+
+## Computation of the pangenome
+
+```
+anvi-gen-genomes-storage -e external-genomes-final.txt \
+                         -o V_jascida-GENOMES.db
+
+anvi-pan-genome -g V_jascida-GENOMES.db \
+                --project-name V_jascida \
+                --num-threads 4                         
+```
+
+## Display of the pangenome
+
+```
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8_biol217
+
+anvi-display-pan -p V_jascida/V_jascida-PAN.db \
+                 -g V_jascida-GENOMES.db
+```
+
+# Und jetzt muss das ganze für die eigenen ausgesuchten Genome
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=128G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=pangenomics_own
+#SBATCH --output=pangenmics_own.out
+#SBATCH --error=pangenomics_own.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd $WORK/pangenomics/genomes_own_samples/
+
+ls *fasta | awk 'BEGIN{FS="_"}{print $1}' > genomes.txt
+
+# remove all contigs <2500 nt
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-script-reformat-fasta ${g}.fasta \
+                               --min-len 2500 \
+                               --simplify-names \
+                               -o ${g}_2.5K.fasta
+done
+
+# generate contigs.db
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-gen-contigs-database -f ${g}_2.5K.fasta \
+                              -o own_samples_${g}.db \
+                              --num-threads 4 \
+                              -n own_samples_${g}
+done
+
+# annotate contigs.db
+for g in *.db
+do
+    anvi-run-hmms -c $g --num-threads 4
+    anvi-run-ncbi-cogs -c $g --num-threads 4
+    anvi-scan-trnas -c $g --num-threads 4
+    anvi-run-scg-taxonomy -c $g --num-threads 4
+done
+```
+Dann muss für die Visualisierung im Terminal eingegeben werden:
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-display-contigs-stats $WORK/pangenomics/genomes_own_samples/*db
+```
