@@ -1023,7 +1023,7 @@ conda activate anvio-8
 
 cd $WORK/pangenomics/pangenome_new/
 
-ls *fasta > genomes.txt
+# ls *fasta > genomes.txt
 
 # remove all contigs <2500 nt
 for g in `cat genomes.txt`
@@ -1057,4 +1057,163 @@ do
     anvi-scan-trnas -c $g --num-threads 4
     anvi-run-scg-taxonomy -c $g --num-threads 4
 done
+```
+
+# Day8
+
+zuerst müssen Module miniconda und READemption geladen und ein Project_Path erstellt werden:
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+
+export http_proxy=http://relay:3128
+export https_proxy=http://relay:3128
+export ftp_proxy=http://relay:3128
+
+cd $WORK/RNAseq/
+conda activate reademption
+reademption create --project_path READemption_analysis --species salmonella="Salmonella Typhimurium"
+```
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=64G
+#SBATCH --time=0-04:00:00
+#SBATCH --job-name=reademption_tutorial
+#SBATCH --output=reademption_tutorial.out
+#SBATCH --error=reademption_tutorial.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+FTP_SOURCE=ftp://ftp.ncbi.nih.gov/genomes/archive/old_refseq/Bacteria/Salmonella_enterica_serovar_Typhimurium_SL1344_uid86645/
+wget -O READemption_analysis/input/salmonella_reference_sequences/NC_016810.fa $FTP_SOURCE/NC_016810.fna
+wget -O READemption_analysis/input/salmonella_reference_sequences/NC_017718.fa $FTP_SOURCE/NC_017718.fna
+wget -O READemption_analysis/input/salmonella_reference_sequences/NC_017719.fa $FTP_SOURCE/NC_017719.fna
+wget -O READemption_analysis/input/salmonella_reference_sequences/NC_017720.fa $FTP_SOURCE/NC_017720.fna
+
+sed -i "s/>/>NC_016810.1 /" READemption_analysis/input/salmonella_reference_sequences/NC_016810.fa
+sed -i "s/>/>NC_017718.1 /" READemption_analysis/input/salmonella_reference_sequences/NC_017718.fa
+sed -i "s/>/>NC_017719.1 /" READemption_analysis/input/salmonella_reference_sequences/NC_017719.fa
+sed -i "s/>/>NC_017720.1 /" READemption_analysis/input/salmonella_reference_sequences/NC_017720.fa
+wget -P READemption_analysis/input/salmonella_annotations https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/210/855/GCF_000210855.2_ASM21085v2/GCF_000210855.2_ASM21085v2_genomic.gff.gz
+
+gunzip READemption_analysis/input/salmonella_annotations/GCF_000210855.2_ASM21085v2_genomic.gff.gz
+wget -P READemption_analysis/input/reads http://reademptiondata.imib-zinf.net/InSPI2_R1.fa.bz2
+wget -P READemption_analysis/input/reads http://reademptiondata.imib-zinf.net/InSPI2_R2.fa.bz2
+wget -P READemption_analysis/input/reads http://reademptiondata.imib-zinf.net/LSP_R1.fa.bz2
+wget -P READemption_analysis/input/reads http://reademptiondata.imib-zinf.net/LSP_R2.fa.bz2
+
+reademption align -p 4 --poly_a_clipping --project_path READemption_analysis
+
+reademption coverage -p 4 --project_path READemption_analysis
+
+reademption gene_quanti -p 4 --features CDS,tRNA,rRNA --project_path READemption_analysis
+reademption deseq -l InSPI2_R1.fa.bz2,InSPI2_R2.fa.bz2,LSP_R1.fa.bz2,LSP_R2.fa.bz2 -c InSPI2,InSPI2,LSP,LSP -r 1,2,1,2 --libs_by_species salmonella=InSPI2_R1,InSPI2_R2,LSP_R1,LSP_R2 --project_path READemption_analysis
+
+reademption viz_align --project_path READemption_analysis
+reademption viz_gene_quanti --project_path READemption_analysis
+reademption viz_deseq --project_path READemption_analysis
+conda deactivate
+module purge
+jobinfo
+```
+
+Open the paper from this Prasse et al. 2017, find out the SRR numbers, quantity of samples and treatments, and write down here:
+
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=64G
+#SBATCH --time=0-04:00:00
+#SBATCH --job-name=reademption_tutorial
+#SBATCH --output=reademption_tutorial.out
+#SBATCH --error=reademption_tutorial.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load micromamba/1.4.2
+micromamba activate 10_grabseqs
+
+export http_proxy=http://relay:3128
+export https_proxy=http://relay:3128
+export ftp_proxy=http://relay:3128
+
+
+mkdir /$WORK/RNAseq/READemption_analysis_my/fastq
+cd /$WORK/RNAseq/READemption_analysis_my/fastq/
+
+grabseqs -t 4 -m ./metadata.csv SRR4018517
+grabseqs -t 4 -m ./metadata.csv SRR4018516
+grabseqs -t 4 -m ./metadata.csv SRR4018515
+grabseqs -t 4 -m ./metadata.csv SRR4018514
+
+micromamba deactivate
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate reademption
+
+reademption create --project_path READemption_analysis_my --species methanosarcina="Methanosarcina mazei Go1"
+```
+
+```
+mkdir ../qc_reports
+for i in *.fastq.gz; do fastqc -t 4 -o ../qc_reports/fastqc_output $i; done
+```
+
+Quality Control
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=64G
+#SBATCH --time=0-04:00:00
+#SBATCH --job-name=qc_reademption
+#SBATCH --output=qc_reademption.out
+#SBATCH --error=qc_reademption.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load micromamba/1.4.2
+micromamba activate 01_short_reads_qc
+
+mkdir $WORK/RNAseq/fastq/qc_reports
+for i in *.fastq.gz; do fastqc -t 4 -o $WORK/RNAseq/fastq/qc_reports/fastqc_output $i; done
+```
+
+sed -i "s/>/>NC_003901.1 /" $WORK/RNAseq/READemption_analysis_my/input/methanosarcina_reference_sequences/methanosarcina_mazei_go1.fna
+
+```
+#!/bin/bash
+#SBATCH --job-name=reademption_
+#SBATCH --output=reademption.out
+#SBATCH --error=reademption.err
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32G
+#SBATCH --time=05:00:00
+#SBATCH --partition=base
+#SBATCH --export=NONE
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate reademption
+
+reademption align -p 4 --poly_a_clipping --project_path READemption_analysis
+reademption coverage -p 4 --project_path READemption_analysis
+reademption gene_quanti -p 4 --features CDS,tRNA,rRNA --project_path READemption_analysis
+reademption deseq -l wt_1.fasta.gz,wt_2.fasta.gz,mut_1.fasta.gz,mut_2.fasta.gz -c wt,wt,mut,mut -r 1,2,1,2 --libs_by_species methanosarcina=wt_1,wt_2,mut_1,mut_2 --project_path READemption_analysis
+reademption viz_align --project_path READemption_analysis
+reademption viz_gene_quanti --project_path READemption_analysis
+reademption viz_deseq --project_path READemption_analysis
+conda deactivate
+jobinfo
 ```
