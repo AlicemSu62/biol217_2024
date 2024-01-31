@@ -918,7 +918,7 @@ conda activate anvio-8
 
 cd $WORK/pangenomics/genomes_own_samples/
 
-ls *fasta | awk 'BEGIN{FS="_"}{print $1}' > genomes.txt
+ls *fasta > genomes.txt
 
 # remove all contigs <2500 nt
 for g in `cat genomes.txt`
@@ -961,4 +961,10 @@ module load miniconda3/4.12.0
 conda activate anvio-8
 
 anvi-display-contigs-stats $WORK/pangenomics/genomes_own_samples/*db
+```
+
+# Create external genomes file
+
+```
+
 ```
