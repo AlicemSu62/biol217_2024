@@ -966,5 +966,95 @@ anvi-display-contigs-stats $WORK/pangenomics/genomes_own_samples/*db
 # Create external genomes file
 
 ```
+anvi-script-gen-genomes-file --input-dir $WORK/pangenomics/genomes_own_samples -o external-genomes.txt
+```
 
+Auf Kontamination prüfen
+
+```
+cd $WORK/pangenomics/genomes_own_samples
+anvi-estimate-genome-completeness -e external-genomes.txt
+```
+
+
+Jetzt muss das pangenome computisiert werden
+
+```
+anvi-gen-genomes-storage -e external-genomes.txt \
+                         -o $WORK/pangenomics/genomes_own_samples/own_sample-GENOMES.db
+
+anvi-pan-genome -g own_sample-GENOMES.db \
+                --project-name ownsample \
+                --num-threads 4 --enforce-hierarchical-clustering
+```
+
+zuletzt muss das Pangenom visualisiert werden
+
+```
+
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8_biol217
+
+anvi-display-pan -p $WORK/pangenomics/genomes_own_samples/own_sample-GENOMES.db \
+                 -g own_sample-GENOMES.db
+```
+
+funktioniert leider nicht. Was ich jetzt versuche, ist, dass ich erstmal nur 5 Genome visualisiere, da die Anzahl der Gene Grund für den Error sein könnte:
+
+ich muss nochmal von vorne anfangen und die Genome in zwei separate Ordner splitten:
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=128G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=pangenomics_own
+#SBATCH --output=pangenmics_own.out
+#SBATCH --error=pangenomics_own.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+cd $WORK/pangenomics/pangenome_new/
+
+ls *fasta > genomes.txt
+
+# remove all contigs <2500 nt
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-script-reformat-fasta ${g}.fasta \
+                               --min-len 2500 \
+                               --simplify-names \
+                               -o ${g}_2.5K.fasta
+done
+
+# generate contigs.db
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-gen-contigs-database -f ${g}_2.5K.fasta \
+                              -o own_samples_${g}.db \
+                              --num-threads 4 \
+                              -n own_samples_${g}
+done
+
+# annotate contigs.db
+for g in *.db
+do
+    anvi-run-hmms -c $g --num-threads 4
+    anvi-run-ncbi-cogs -c $g --num-threads 4
+    anvi-scan-trnas -c $g --num-threads 4
+    anvi-run-scg-taxonomy -c $g --num-threads 4
+done
 ```
