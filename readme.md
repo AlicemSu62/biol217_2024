@@ -1293,3 +1293,7 @@ RS_12835
 RS_19460
 RS_17565
 RS_16165
+
+#How to create an image:
+
+![igb](Path/to/image)
