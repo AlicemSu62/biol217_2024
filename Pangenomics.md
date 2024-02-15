@@ -21,3 +21,10 @@ the InterPro database provides an integrative classification of protein sequence
 AlphaFold is an Ai-based system developed by DeepMind. It predicts 3D Protein structures from exported AA sequences and enables functional interpretation and evolution experiments and gives information complementary to pangenome analysis.
 
 For pangenomics, it is important to know when to cluster what. Gene clusters are grounded on the AA similarities between genomes. After clustering the genes, gene frequencies are being analyzed and with the allocation of genes into the core genome, accessory genome and Singletons questions as "which genes are essential" , and "which genes are individual" can be answered. Geometric and functional homogeneity look for changes in gene cluster patterns or biochemical function and give information on evolution analysis through region with high/low variability. at last, with the functional annotations, it is looked for specific metabolic pathways and features and asked, what the organism can do.
+
+## Pangenomics - comparing genomes using ANVIO
+
+(the following must be done on the caucluster, because I have not downloaded the required modules yet)
+
+
+
