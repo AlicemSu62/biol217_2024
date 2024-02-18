@@ -242,7 +242,14 @@ for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done
 anvi-profile -i ? -c ? --output-dir ?
 ----
 
-Day 4
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-interactive -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C YOUR_COLLECTION
+
+
+## Day 4
 
 cd /workbeegfs/Metagenomics/3_coassembly
 

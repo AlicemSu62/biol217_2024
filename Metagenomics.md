@@ -22,8 +22,42 @@ The fastp-processed data was then utilized to execute genome asseblies employing
 
 For visualization of the contig graph in Bandage, the next step involved converting the intermediate contigs in FASTA format to SPAdes-like FASTG format. Subsequently, the generated FASTG file was loaded into Bandage, a GUI-based program, for visualization and analysis. The final.contigs.fastg file served as the input for Bandage, enabling the exploration and interpretation of the contig graph using its graphical user interface (GUI).
 
-![Bandage] (Downloads/Visualization_Contigs_Metagenomics.png)
+![Bandage](Downloads/Visualization_Contigs_Metagenomics.png)
 
+The figure shows contig graphs drawn by Bandage, a graphical user interface (GUI) program.
+
+N50 value and relevance: N50 where the lengths of aligned blocks are counted instead of the contig lengths. I.e., if a contig has a missassembly with respect to the reference, the contig is broken into smaller pieces. This metric is computed only if a reference genome is computed. 
+How many contigs are assembled: 57414 
+- Methanoculleus_bourgensis_MS2	958
+- Porphyromonadaceae_bacterium_ING2_E5B	399
+- not_aligned	56057
+What is the total length of the contigs: 145675865 kbp
+
+
+The initial step involved formatting fasta sequence IDs using anvi'o to ensure subsequent functionality during sequence matching and mapping processes.
+
+Following this, raw reads were mapped onto assembled contigs using Bowtie2, with prior indexing of the mapping reference fasta file to expedite the mapping process.
+
+Anvi'o was then employed to preprocess contigs data, involving computations of k-mer frequencies, soft-splitting of contigs longer than 20,000 bp, and identification of open reading frames using Prodigal.
+
+Subsequent Hidden Markov Model (HMM) searches on contigs were performed using anvi'o to identify genes with known functions, leveraging multiple default bacterial single-copy core gene collections to aid in gene hit identification.
+
+Upon preparation of the contigs database and optional execution of HMM searches, anvi-display-contigs-stats facilitated a rapid assessment of assembly output and an estimation of recoverable bacterial and archaeal genomes.
+
+Genome binning was executed using Anvi'o, encompassing steps such as sorting and indexing of .bam files and establishment of an Anvi'o profile to store sample-specific contig information. Anvi-profile further processed each contig, providing insights into mean coverage, standard deviation of coverage, and single-nucleotide variants.
+
+Finally, genome binning was performed utilizing Metabat2 and MaxBin2.
+
+Number of Archaea bins from MetaBAT2: 3
+Number of Archaea bins from Maxbin2: 2
+
+The completeness and contamination levels of the genomes were estimated to assess the quality of the bins. This evaluation was performed using anvi-estimate-genome-completeness.
+
+The data required for this assessment was already available in the HTML file generated from binning.
+
+Subsequently, the results were visualized and evaluated using anvi-interactive. This tool allowed for manual inspection and manipulation of bins. 
+
+![BinningGraph](Desktop/Masterstudium/biol217/Screenshots/Binning_Metagenomics.png)
 
 
 
