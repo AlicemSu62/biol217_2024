@@ -18,12 +18,17 @@
   inline code:
   this is the command `cp`
 
-damit ich ins caucluster komme
+the caucluster can be accessed via following command
+
 ```
   ssh -X sunam238@caucluster.rz.uni-kiel.de
 ```
 ### Task: How to add links and images to the end file
 
+```
+![Picture](path/to/picture)
+
+```
 -------
 
 # Day 2
@@ -32,6 +37,9 @@ damit ich ins caucluster komme
 
 zuerst muss gesagt werden, was der Umstand für das Programmieren ist. Wir haben in dem Fall jetzt sequence files, 6 Stück insgesamt, 3 davon sind normal und 3 davon reversed reads. Am Ende ergeben 1 normal read und ein reversed read paired end readfiles. Die Files habe den Datentypen fastq.gz.
 Mit fastqc (qc für QualityControl) verwirklicht man eine Visualisierung der fastq Dateien. HTMLs werden ausgegeben, die man dann in einen Internetbrowser kopieren kann und die visualisierte Datei sieht. 
+
+In the initial stage of the analysis, the quality of the sequenced data (6 reads, 3 forward and 3 reversed - 1 of forwared and reversed make one paired end readfile - so in sum we get 3 paired end readfiles) was assessed using fastqc and fastp tools. Fastqc provided an overview of basic quality control metrics, particularly focusing on the phred quality score to evaluate the accuracy of base reading. To facilitate organization, a folder was created to store the results using the mkdir command. The analysis began by looping over all files with the .gz extension, representing compressed .fastq files, within the current directory. Alternatively, the second command was utilized for individual files, with both commands directing the output to the designated output_folder.
+
 ```
 #!/bin/bash
 #SBATCH --nodes=1
@@ -55,19 +63,25 @@ for i in *.gz; do fastqc $i -o ../1_fastqc/; done
 ```
 --------------------
 
-```
-dann muss man gucken, ob die File vom caucluster prozessiert wurde: 
+jobs can be submitted through the command sbatch
 
+```
+sbatch jobscript.sh
+```
+
+
+the status of submission can be checked via squeue (if job is submitted, if job is still processing)
+
+```
 squeue -u sunam238
-ls 
-queue 
 ```
 Die html s auf den eigenen PC kopieren, dafür einfach neues Terminal-Fenster öffnen, denn das aktuelle Terminal greift auf das cau-cluster zu.
-```
 
+```
 scp sunam238@caucluster.rz.uni-kiel.de:/work_beegfs/suname238/Metagenomics/1_fastqc/*.html.
 ```
-Mit fastp cleaned man die reads und gibt neuen input
+
+## fast p
 
 ```
 #!/bin/bash
@@ -86,11 +100,7 @@ module load miniconda3/4.12.0
 conda activate anvio-8
 
 cd /work_beegfs/sunam238/Metagenomics/0_raw_reads
-```
 
-## fastp 
-
-```
 module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
@@ -106,6 +116,8 @@ fastp -i BGR_130708_mapped_R1.fastq.gz  -I BGR_130708_mapped_R2.fastq.gz  -R BGR
 ---------------------
 
 ## megahit
+
+The fastp-processed data was then utilized to execute genome asseblies employing megahit, an NGS assembler known for its efficiency in handling metagenomes coassembly across multiple samples. The assembly was performed with specific parameters tailored for metagenomic data analysis, including a minimum contig length of 1000 base pairs (bp). The resulting contigs were stored in the output folder, with each sample producing an assembly file labeled as final.contigs.fa. It is important to note that these contigs represent only a fraction of the longer context to which they belong.
 
 ```
 #!/bin/bash
@@ -127,8 +139,16 @@ cd /work_beegfs/sunam238/Metagenomics/2_fastp
                                        
 megahit -1 GR_130305_mapped_R1.fastq.gz -1 BGR_130527_mapped_R1.fastq.gz -1 BGR_130708_mapped_R1.fastq.gz -2 GR_130305_mapped_R2.fastq.gz -2 BGR_130527_mapped_R2.fastq.gz -2 BGR_130708_mapped_R2.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 -o ../3_coassembly -t 12 
 ```
-Day 3
 
+For visualization of the contig graph in Bandage, the next step involved converting the intermediate contigs in FASTA format to SPAdes-like FASTG format. Subsequently, the generated FASTG file was loaded into Bandage, a GUI-based program, for visualization and analysis. The final.contigs.fastg file served as the input for Bandage, enabling the exploration and interpretation of the contig graph using its graphical user interface (GUI).
+
+---------------------------
+
+# Day 3
+
+
+
+```
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
@@ -147,7 +167,7 @@ conda activate anvio-8
 cd /work_beegfs/sunam238/Metagenomics
 
 metaquast -t 6 -o ./3_metaquast -m 1000 ./3_coassembly/final.contigs.fa
-
+```
 ----
 danach ein zweites Fenster im Terminal öffnen und mit dem stu-Account den Befehl eingeben zum Kopieren (scp=):
 ----
