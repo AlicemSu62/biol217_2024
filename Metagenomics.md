@@ -22,7 +22,7 @@ The fastp-processed data was then utilized to execute genome asseblies employing
 
 For visualization of the contig graph in Bandage, the next step involved converting the intermediate contigs in FASTA format to SPAdes-like FASTG format. Subsequently, the generated FASTG file was loaded into Bandage, a GUI-based program, for visualization and analysis. The final.contigs.fastg file served as the input for Bandage, enabling the exploration and interpretation of the contig graph using its graphical user interface (GUI).
 
-![Bandage] (./Dieser PC/Downloads/Visualization_Contigs_Metagenomics.png)
+![Bandage] (Downloads/Visualization_Contigs_Metagenomics.png)
 
 
 
