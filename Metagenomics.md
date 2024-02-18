@@ -28,9 +28,9 @@ The figure shows contig graphs drawn by Bandage, a graphical user interface (GUI
 
 N50 value and relevance: N50 where the lengths of aligned blocks are counted instead of the contig lengths. I.e., if a contig has a missassembly with respect to the reference, the contig is broken into smaller pieces. This metric is computed only if a reference genome is computed. 
 How many contigs are assembled: 57414 
-- Methanoculleus_bourgensis_MS2	958
-- Porphyromonadaceae_bacterium_ING2_E5B	399
-- not_aligned	56057
+- Methanoculleus_bourgensis_MS2:	958
+- Porphyromonadaceae_bacterium_ING2_E5B:	399
+- not_aligned:	56057
 What is the total length of the contigs: 145675865 kbp
 
 
@@ -59,9 +59,70 @@ Subsequently, the results were visualized and evaluated using anvi-interactive. 
 
 ![BinningGraph](Desktop/Masterstudium/biol217/Screenshots/Binning_Metagenomics.png)
 
+Which binning strategy gives the best quality for the ARCHAEA bins?
+How many Archaea bins does one get that are of high quality? How any Bacteria bins does one get that are of High Quality?
+
+Exclusively focusing on ARCHAEA BINS, anvi-summarize was employed for a comprehensive overview of the bin collection, generating SUMMARY containing various statistics and an HTML output for visualization. This also created .fa files crucial for further analysis.
+
+![BinRefinement](Desktop/Masterstudium/biol217/Screenshots/BinRefinement.png)
+
+Additionally, GUNC was used to detect chimerism and contamination in prokaryotic genomes, identifying chimeric genomes erroneously assembled from separate organisms.
+
+![GUNC](Desktop/Masterstudium/biol217/Screenshots/GUNC.png)
+
+Do you get Archaea bins that are chimeric?
+hint: look at the CSS score (explained in the lecture) and the column PASS GUNC in the tables outputs per bin in your gunc_output folder.
+In your own words (2 sentences max), explain what is a chimeric bin.
+
+Given the potentially numerous bins resulting from large metagenome assemblies, bins with over 70% completeness were pre-selected for manual refinement. Using anvi refine, the selected bins were then manually refined. The interactive interface allowed for categorizing contigs into seperate bins, evaluating taxonomy and duplicate single copy core genes, and removing contigs as needed. During refinement, clustering based on differential coverage and sequence composition was employed to identify outliers, facilitating a more accurate binning process. 
+
+
+
+
+
 
 
 Discussion
+
+- Figure of Assembly step (day2)
+- Questions
+    What is your N50 value? Why is this value relevant?
+    How many contigs are assembled?
+    What is the total length of the contigs?
+- Questions
+    Which binning strategy gives you the best quality for the 
+    Archaea bins??
+    How many 
+    Archaea bins do you get that are of High Quality? How many 
+    Bacteria bins do you get that are of High Quality?
+- Questions
+    Do you get 
+    bins that are chimeric?
+    hint: look at the CSS score (explained in the lecture) and the column PASS GUNC in the tables outputs per bin in your gunc_output folder.
+    In your own words (2 sentences max), explain what is a chimeric bin.
+- Questions
+    Does the quality of your 
+    improve?
+    hint: look at completeness redundancy in the interface of anvio and submit info of before and after
+    Submit your output Figure
+- Questions
+    	how abundant are the archaea bins in the 3 samples? (relative abundance)
+
+    **you can also use anvi-inspect -p -c, anvi-script-get-coverage-from-bam or, anvi-profile-blitz. Please look up the help page for each of those commands and construct the appropriate command line
+- Questions
+    Did you get a species assignment to the 
+     bins previously identified?
+    Does the HIGH-QUALITY assignment of the bin need revision?
+    hint: MIMAG quality tiers https://www.nature.com/articles/nbt.3893
+
+
+
+N50 value and relevance: N50 where the lengths of aligned blocks are counted instead of the contig lengths. I.e., if a contig has a missassembly with respect to the reference, the contig is broken into smaller pieces. This metric is computed only if a reference genome is computed. 
+
+Which binning strategy gives the best quality for the ARCHAEA bins?
+How many Archaea bins does one get that are of high quality? How any Bacteria bins does one get that are of High Quality?
+
+
 
 # Folie 16 von Cynthia miteinbeziehen
 What can Metagenomics not do?

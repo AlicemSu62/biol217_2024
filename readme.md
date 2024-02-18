@@ -565,7 +565,7 @@ gunc run -i METABAT__1-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_pro
 
 
 ```
-anvi-refine -c ./CC/4_mapping/contigs.db -C METABAT -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__44
+anvi-refine -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C METABAT -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__44
 ```
 
 
@@ -631,7 +631,11 @@ anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_map
 
 ```
 
+anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/map130305.sam.bam.sorted.bam -c /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/map130305/AUXILIARY-DATA.db/ -C YOUR_COLLECTION -m contig -o /work_beegfs/sunam238/Metagenomics/CC/
 
+anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/map130527.sam.bam.sorted.bam 
+
+anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/map130708.sam.bam.sorted.bam 
 
 # Day6
 
