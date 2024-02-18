@@ -18,11 +18,11 @@
   inline code:
   this is the command `cp`
 
-the caucluster can be accessed via following command
+the caucluster can be accessed via command `ssh -X sunam238@caucluster.rz.uni-kiel.de`
 
-```
-  ssh -X sunam238@caucluster.rz.uni-kiel.de
-```
+
+
+
 ### Task: How to add links and images to the end file
 
 ```
@@ -142,11 +142,22 @@ megahit -1 GR_130305_mapped_R1.fastq.gz -1 BGR_130527_mapped_R1.fastq.gz -1 BGR_
 
 For visualization of the contig graph in Bandage, the next step involved converting the intermediate contigs in FASTA format to SPAdes-like FASTG format. Subsequently, the generated FASTG file was loaded into Bandage, a GUI-based program, for visualization and analysis. The final.contigs.fastg file served as the input for Bandage, enabling the exploration and interpretation of the contig graph using its graphical user interface (GUI).
 
+```
+megahit_toolkit contig2fastg 99 final.contigs.fa > final.contigs.fastg                   
+```
+
+Questions
+Please submit your generated figure and explain in your own words what you can see (keep it short).
+
+***The graph shows all contigs resulting from megahit with a total of 57414 nodes, 8 edges and a total base length of 145675865 kbp. Other data given in Bandage are N50=2963 bp.***
+
+
+
 ---------------------------
 
 # Day 3
 
-
+Quast, a QUality ASsessment Tool, is utilized to evaluate genome assembly, particularly the results obtained from megahit. To initiate the evaluation process, navigate to the Quast folder using the terminal and execute the following jobscript:
 
 ```
 #!/bin/bash
@@ -168,13 +179,33 @@ cd /work_beegfs/sunam238/Metagenomics
 
 metaquast -t 6 -o ./3_metaquast -m 1000 ./3_coassembly/final.contigs.fa
 ```
+
 ----
-danach ein zweites Fenster im Terminal öffnen und mit dem stu-Account den Befehl eingeben zum Kopieren (scp=):
-----
-scp sunam238@caucluster.rz.uni-kiel.de:/work_beegfs/sunam238/Metagenomics/3_metaquast/report.html .
+
+html-file can be downloaded or following command can be given into the local terminal:
+```
+scp sunam238@caucluster.rz.uni-kiel.de:/work_beegfs/sunam238/Metagenomics/3_metaquast/report.html 
+```
+
+Questions
+What is your N50 value? Why is this value relevant?
+How many contigs are assembled?
+What is the total length of the contigs?
 
 
+***N50 value and relevance: N50 where the lengths of aligned blocks are counted instead of the contig lengths. I.e., if a contig has a missassembly with respect to the reference, the contig is broken into smaller pieces. This metric is computed only if a reference genome is computed. ***
+How many contigs are assembled: 57414 
+- Methanoculleus_bourgensis_MS2:	958
+- Porphyromonadaceae_bacterium_ING2_E5B:	399
+- not_aligned:	56057
+What is the total length of the contigs: 145675865 kbp
 
+
+## Binning 
+
+For Binnning, the initial step involved formatting fasta sequence IDs using anvi'o to ensure subsequent functionality during sequence matching and mapping processes.
+
+```
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
@@ -190,12 +221,10 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
 
+cd /work_beegfs/sunam238/Metagenomics/
 
 anvi-script-reformat-fasta ./3_coassembly/final.contigs.fa -o /work_beegfs/sunam238/Metagenomics/3_coassembly/contigs.anvio.fa --min-len 1000 --simplify-names --report-file name_conversion.txt
-
-sbatch
-
-squeue -u sunam238
+```
 
 
 

@@ -26,6 +26,10 @@ For visualization of the contig graph in Bandage, the next step involved convert
 
 The figure shows contig graphs drawn by Bandage, a graphical user interface (GUI) program.
 
+Assessment of Assembly Quality
+
+Quast, a QUality ASsessment Tool, is utilized to evaluate genome assembly, particularly the results obtained from megahit. To initiate the evaluation process, navigate to the Quast folder using the terminal and execute the following command:
+
 N50 value and relevance: N50 where the lengths of aligned blocks are counted instead of the contig lengths. I.e., if a contig has a missassembly with respect to the reference, the contig is broken into smaller pieces. This metric is computed only if a reference genome is computed. 
 How many contigs are assembled: 57414 
 - Methanoculleus_bourgensis_MS2:	958
