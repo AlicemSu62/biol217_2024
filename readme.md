@@ -564,7 +564,7 @@ conda activate gunc
 ```
 
 ```
-cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
 
 mkdir GUNC
 
@@ -622,11 +622,6 @@ gunc run -i METABAT__23-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_pr
 
 gunc run -i METABAT__41-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC_new --threads 10 --detailed_output
 
-```
-
-
-```
-anvi-refine -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C METABAT -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__44
 ```
 
 
@@ -731,6 +726,7 @@ will only give you erronous results.**
 ```
 anvi-refine -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C METABAT -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__19
 ```
+just ran for METABAT_19 because it is considered a high quality bin. (i think, i only need one to visualize in the protocol)
 
 ```
 #!/bin/bash
@@ -772,6 +768,7 @@ anvi-estimate-scg-taxonomy -c /work_beegfs/sunam2es/profile.db --metagenome-mode
 Questions
 Did you get a species assignment to the 
  bins previously identified?
+ ***muss noch erledigt werden***
 Does the HIGH-QUALITY assignment of the bin need revision?
 hint: MIMAG quality tiers https://www.nature.com/articles/nbt.3893
 
