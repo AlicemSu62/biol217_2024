@@ -492,7 +492,7 @@ conda activate anvio-8
 anvi-interactive -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C YOUR_COLLECTION
 ```
 Which binning strategy gives the best quality for the ARCHAEA bins?
-***METABAT works with 375 contigs creating 48 bins while MAXBIN works with 1381 contigs and makes 69 bins. Out of these 69 bins, one is an Archaea bin. METABAT on the other hand, has 3 Archaea bins. In order to say, which bin gives better quality Archaea bins, the parameter Completion has to be looked over for the Archaea bins for each binning type. MAXBIN_10 has a completion of 96.05%, METABAT_14, METABAT_8 and METABAT_39 have completions of 43.68%, 97.37%, and 50.00%.  ***
+***METABAT works with 375 contigs creating 48 bins while MAXBIN works with 1381 contigs and makes 69 bins. Out of these 69 bins, one is an Archaea bin. METABAT on the other hand, has 3 Archaea bins. In order to say, which bin gives better quality Archaea bins, the parameter Completion has to be looked over for the Archaea bins for each binning type. MAXBIN_10 has a completion of 96.05%, METABAT_14, METABAT_8 and METABAT_39 have completions of 43.68%, 97.37%, and 50.00%.***
 How many Archaea bins does one get that are of high quality? How many Bacteria bins does one get that are of High Quality?
 ***Bins that are of high quality are those with a completion over 90% percent and a contamination less than 5%. METABAT_8 would be the only high quality bin with 97.37% completion and about 5% redundancy.***
 
@@ -511,7 +511,7 @@ METABAT_19 : 97.37%
 METABAT_23 : 39.47%
 METABAT_41 : 50.00%
 
-# Day 4 ()
+# Day 4 (in reality it is day 5)
 
 ```
 #!/bin/bash
@@ -534,16 +534,18 @@ cd /work_beegfs/sunam238/Metagenomics
 anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db --list-collections
 
 anvi-summarize -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/profile.db -C METABAT2 -o SUMMARY_METABAT2 --just-do-it
-```
+
 anvi-estimate-genome-completeness -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT > file
 
 (damit lässt man sich eine Tabelle ausgeben, jetzt müssen die Archeae rausgepickt werden)
 
 ```
-METABAT__23 | ARCHAEA
-METABAT__44 | ARCHAEA
-METABAT__1  | ARCHAEA 
-```
+METABAT_32 is an ARCHAEA bin compl. 50%
+METABAT_18 is an Archaea bin compl. 39.47%
+METABAT_27 is an Archaea bin compl. 97.37%
+
+***i am assuming, the bin numbers for METABAT are changing each time, i am giving in the command again. Important to notice is which archaea with which completion and redundancy is given. The only high quality archaea bin is the one with 97.37% (Methanoculleus sp012797575). The bin for Methanosarcina flavescens is of low quality since the completion percentage is under 50% (39.47%). The bin for Methanoculleus thermohydrogenotrophicum is of medium quality because of 50% completion and under 10% contamination (5.26%).***
+
 
 
 ```
