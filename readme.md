@@ -493,6 +493,7 @@ anvi-interactive -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_m
 ```
 Which binning strategy gives the best quality for the ARCHAEA bins?
 ***METABAT works with 375 contigs creating 48 bins while MAXBIN works with 1381 contigs and makes 69 bins. Out of these 69 bins, one is an Archaea bin. METABAT on the other hand, has 3 Archaea bins. In order to say, which bin gives better quality Archaea bins, the parameter Completion has to be looked over for the Archaea bins for each binning type. MAXBIN_10 has a completion of 96.05%, METABAT_14, METABAT_8 and METABAT_39 have completions of 43.68%, 97.37%, and 50.00%.***
+***Another idea: The MAXBIN bin for Methanocelleus sp012797575 has 1045 contig number and completion of 96.05%, but it is useless because it has a redundancy of 80.26%. The bin from Metabat has a redundancy of about 5% and a completion of 97.37% making it a high quality bin. In addition, the other bin from MAXBIN is 0% completed. METABAT does have two more bins, one of medium and one of low quality, but the completion is not zero.***
 How many Archaea bins does one get that are of high quality? How many Bacteria bins does one get that are of High Quality?
 ***Bins that are of high quality are those with a completion over 90% percent and a contamination less than 5%. METABAT_8 would be the only high quality bin with 97.37% completion and about 5% redundancy.***
 
@@ -544,7 +545,7 @@ METABAT_32 is an ARCHAEA bin compl. 50%
 METABAT_18 is an Archaea bin compl. 39.47%
 METABAT_27 is an Archaea bin compl. 97.37%
 
-***i am assuming, the bin numbers for METABAT are changing each time, i am giving in the command again. Important to notice is which archaea with which completion and redundancy is given. The only high quality archaea bin is the one with 97.37% (Methanoculleus sp012797575). The bin for Methanosarcina flavescens is of low quality since the completion percentage is under 50% (39.47%). The bin for Methanoculleus thermohydrogenotrophicum is of medium quality because of 50% completion and under 10% contamination (5.26%).***
+***i am assuming, the bin numbers for METABAT are changing each time that i am giving in the command again. Important to notice is which archaea with which completion and redundancy is given. The only high quality archaea bin is the one with 97.37% (Methanoculleus sp012797575). The bin for Methanosarcina flavescens is of low quality since the completion percentage is under 50% (39.47%). The bin for Methanoculleus thermohydrogenotrophicum is of medium quality because of 50% completion and under 10% contamination (5.26%). (I cant't believe, how long it took me to figure out, lost important time with this one)***
 
 
 
@@ -581,15 +582,17 @@ anvi-summarize -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_prof
 ```
 cd ./CC/5_anvio_profiles/SUMMARY_METABAT2/bin_by_bin
 
-mkdir ../../ARCHAEA_BIN_REFINEMENT
+mkdir ../../ARCHAEA_BIN_REFINEMENT_new
 
-cp METABAT_23/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
-cp METABAT_44/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
-cp METABAT_1/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT/
+cp METABAT__19/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT_new/
+cp METABAT__23/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT_new/
+cp METABAT__41/*.fa /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT_new/
 ```
 
 
 # GUNC
+
+Additionally, GUNC was used to detect chimerism and contamination in prokaryotic genomes, identifying chimeric genomes erroneously assembled from separate organisms.
 
 ```
 
@@ -608,16 +611,16 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate gunc
 
-cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT_new
 
 
-mkdir GUNC
+mkdir GUNC_new
 
-gunc run -i METABAT__44-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__44 --threads 10 --detailed_output
+gunc run -i METABAT__19-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC_new --threads 10 --detailed_output
 
-gunc run -i METABAT__23-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__23 --threads 10 --detailed_output
+gunc run -i METABAT__23-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC_new --threads 10 --detailed_output
 
-gunc run -i METABAT__1-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC/METABAT__1 --threads 10 --detailed_output
+gunc run -i METABAT__41-contigs.fa -r /work_beegfs/sunam238/Databases/gunc_db_progenomes2.1.dmnd --out_dir GUNC_new --threads 10 --detailed_output
 
 ```
 
@@ -627,12 +630,19 @@ anvi-refine -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C MET
 ```
 
 
+```
+gunc plot -d GUNC_new/diamond_output/METABAT__19-contigs.diamond.progenomes_2.1.out -g GUNC_new/gene_calls/gene_counts.json
+```
+***somehow, this command is not running (KeyError: METABAT__19-contigs)***
 
-gunc plot -d GUNC/METABAT__1/diamond_output/METABAT__1-contigs.diamond.progenomes_2.1.out -g GUNC/METABAT__1/gene_calls/gene_counts.json 
 
+Questions
+Do you get bins that are chimeric?
+***Dont know yet***
+hint: look at the CSS score (explained in the lecture) and the column PASS GUNC in the tables outputs per bin in your gunc_output folder.
+In your own words (2 sentences max), explain what is a chimeric bin.
 
-
-
+The Clade Separation Score (CSS) is a metric designed to quantify the diversity of taxonomic assignments within individual contigs within a genome assembly. It is normalized relative to the overall taxonomic diversity across the entire genome assembly and further normalized based on the expected entropy when there is no discernible relationship between taxonomic labels across contigs. The CSS value ranges between 0 and 1, where a value closer to 1 indicates high diversity of taxonomic assignments within contigs, even if they are internally homogeneous but disagree with each other. Conversely, a genome with all genes consistently assigned to the same taxonomy, indicating absence of contamination, will be assigned a CSS score of 0.
 
 ```
 #!/bin/bash
