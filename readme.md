@@ -38,7 +38,7 @@ the caucluster can be accessed via command `ssh -X sunam238@caucluster.rz.uni-ki
 zuerst muss gesagt werden, was der Umstand für das Programmieren ist. Wir haben in dem Fall jetzt sequence files, 6 Stück insgesamt, 3 davon sind normal und 3 davon reversed reads. Am Ende ergeben 1 normal read und ein reversed read paired end readfiles. Die Files habe den Datentypen fastq.gz.
 Mit fastqc (qc für QualityControl) verwirklicht man eine Visualisierung der fastq Dateien. HTMLs werden ausgegeben, die man dann in einen Internetbrowser kopieren kann und die visualisierte Datei sieht. 
 
-In the initial stage of the analysis, the quality of the sequenced data (6 reads, 3 forward and 3 reversed - 1 of forwared and reversed make one paired end readfile - so in sum we get 3 paired end readfiles) was assessed using fastqc and fastp tools. Fastqc provided an overview of basic quality control metrics, particularly focusing on the phred quality score to evaluate the accuracy of base reading. To facilitate organization, a folder was created to store the results using the mkdir command. The analysis began by looping over all files with the .gz extension, representing compressed .fastq files, within the current directory. Alternatively, the second command was utilized for individual files, with both commands directing the output to the designated output_folder.
+In the initial stage of the analysis, the quality of the sequenced data (6 reads, 3 forward and 3 reverse - 1 of forward and reverse make one paired end readfile - so in sum, we get 3 paired end readfiles) was assessed using fastqc and fastp tools. Fastqc provided an overview of basic quality control metrics, particularly focusing on the phred quality score to evaluate the accuracy of base reading. To facilitate organization, a folder was created to store the results using the mkdir command. The analysis began by looping over all files with the .gz extension, representing compressed .fastq files, within the current directory. Alternatively, the second command was utilized for individual files, with both commands directing the output to the designated output_folder.
 
 ```
 #!/bin/bash
@@ -226,10 +226,9 @@ cd /work_beegfs/sunam238/Metagenomics/
 anvi-script-reformat-fasta ./3_coassembly/final.contigs.fa -o /work_beegfs/sunam238/Metagenomics/3_coassembly/contigs.anvio.fa --min-len 1000 --simplify-names --report-file name_conversion.txt
 ```
 
+Following this, clean reads were mapped onto assembled contigs using Bowtie2, with prior indexing of the mapping reference fasta file to expedite the mapping process.
 
-
-----------
-
+```
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
@@ -251,25 +250,46 @@ cd work_beegfs/sunam238/Metagenomics/3_coassembly/
 module load bowtie2
 bowtie2-build contigs.anvio.fa contigs.anvio.fa.index
 
-  
-  
- 
-
-
-bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130305_mapped_R1_clean.fastq.gz -2 /PATH/TO/BGR_130305_mapped_R2_clean.fastq.gz -S map130305
+bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130305_mapped_R1_clean.fastq.gz -2 ../2_fastp/BGR_130305_mapped_R2_clean.fastq.gz -S map130305.sam
 
 bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130527_mapped_R1_clean.fastq.gz -2 ../2_fastp/BGR_130527_mapped_R2_clean.fastq.gz -S map130527.sam
 
 bowtie2 --very-fast -x contigs.anvio.fa.index -1 ../2_fastp/BGR_130708_mapped_R1_clean.fastq.gz -2 ../2_fastp/BGR_130708_mapped_R2_clean.fastq.gz -S map130708.sam
+```  
 
+The SAM files are converted into a binary alignment and map (BAM) file with the extension .bam using samtools.
 
------
+```
 module load samtools
-samtools view -bS ? > bam_file.bam
+samtools view -bS sam_file.sam > bam_file.bam
+```
+or in a loop with the adequate path: `for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done`
 
--------- 
-Contigs data preparation
-------
+----------
+
+## Mapping
+
+Anvi'o was then employed to preprocess contigs data, involving computations of k-mer frequencies, soft-splitting of contigs longer than 20,000 bp, and identification of open reading frames using Prodigal.
+Subsequent Hidden Markov Model (HMM) searches on contigs were performed using anvi'o to identify genes with known functions, leveraging multiple default bacterial single-copy core gene collections to aid in gene hit identification.
+Upon preparation of the contigs database and optional execution of HMM searches, anvi-display-contigs-stats facilitated a rapid assessment of assembly output and an estimation of recoverable bacterial and archaeal genomes.
+Genome binning was executed using Anvi'o, encompassing steps such as sorting and indexing of .bam files and establishment of an Anvi'o profile to store sample-specific contig information. 
+
+
+```
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --time=5:00:00
+#SBATCH --job-name=anvi
+#SBATCH --output=anvi.out
+#SBATCH --error=anvi.err
+#SBATCH --partition=base
+#SBATCH --reservation=biol217
+
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
 
 cd /work_beegfs/sunam238/Metagenomics/3_coassembly/
 
@@ -281,76 +301,9 @@ anvi-run-hmms -c contigs.db
 
 
 srun --reservation=biol217 --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --nodelist=node002 /bin/bash
-
----
-------
-----
-for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done
-
-
-anvi-profile -i ? -c ? --output-dir ?
-----
-
-module load gcc12-env/12.1.0
-module load miniconda3/4.12.0
-conda activate anvio-8
-
-anvi-interactive -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C YOUR_COLLECTION
-
-
-## Day 4
-
-cd /workbeegfs/Metagenomics/3_coassembly
-
-module load samtools
-
-for i in *.sam; do samtools view -bS $i > "$i".bam; done
-
-dieser Schritt war erforderlich, um aus den sam-Dateitypen (sequence mapping file) einen bam-Dateitypen (binary alignment file) zu machen.
-
------
-
-Fortsetzung von dem letzten Command von Day3.
-Eine File wurde heruntergeladen -> contigs.db darin sind die contigs enthalten
-
-```
-srun --reservation=biol217 --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --nodelist=node002 /bin/bash 
 ```
 
-Danach:
-
-Muss ich auf anvio interactive zugreifen
-anvio interactive brauch ich jedes einzelne Mal
-ich muss immer die gleichen Schritte gehen
-Ich muss die command line, die ich im interactive mode runnen möchte, replacen 
-Das folgende Skript dient zur Visualisierung unserer Dateien.
-
-```
-module load gcc12-env/12.1.0
-module load miniconda3/4.12.0
-conda activate anvio-8
-```
-```
-anvi-display-contigs-stats contigs.db
-```
-(Dieser command ist abhängig davon, was man im interactive mode runnen möchte und muss demnach geändert bleiben. Der Rest des Skriptes ist fix und kann für andere Visualisierungen verwendet werden.)
-
-Neues Terminal öffnen!
-
-ssh -L 8060:localhost:8080 sunam238@caucluster-old.rz.uni-kiel.de
-ssh -L 8080:localhost:8080 node238
-
-Internetbrowser öffnen und folgendes kopieren: 
-http://127.0.0.1:8060 oder http://127.0.0.1:8080
-
-anvi-display-contigs-stats contigs.db
-(without srun, das klappt auch)
-
-### Binning mit ANVI´O
-
-ANVI´O: ANalysis and Visualization platform for microbial ´Omics
-
-Online-Tutorial, wenn ich verwirrt bin: https://merenlab.org/2016/06/22/anvio-tutorial-v2/
+An anvi'o profile retains sample-specific details regarding contigs. By profiling a BAM file with anvi'o using the command anvi-profile, a unified profile is generated. Anvi-profile further processed each contig, providing insights into mean coverage, standard deviation of coverage, and single-nucleotide variants.
 
 ```
 #!/bin/bash
@@ -368,22 +321,15 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
 
-
-cd /work_beegfs/sunam238/Metagenomics/3_coassembly/ -->
-
-
-
-
-for i in *.bam; do anvi-init-bam $i -o ../5_anvio_profiles/"$i".sorted.bam; done
+anvi-profile -i map130708.sam..bam -c contigs.db --output-dir OUTPUT_DIR
+mkdir /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/
+for i in `ls *.sorted.bam | cut -d "." -f 1`; do anvi-profile -i "$i".bam.sorted.bam -c work_beegfs/sunam238/Metagenomics/3_coassembly/contigs.db -o /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/”$i”; done
 ```
 
+important note: Cynthia sent me required data because of previous errors which are in the folder CC `/work_beegfs/sunam238/Metagenomics/CC/`
+----
 
 
-cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
-
-anvi-profile -i anvio.bam -c ../3_coassembly/contigs.db --output-dir OUTPUT_DIR
-
-stattdessen das für jede Bam-File einzeln einzugeben, ist hier die For-Schleife:
 
 ```
 #!/bin/bash
@@ -391,9 +337,9 @@ stattdessen das für jede Bam-File einzeln einzugeben, ist hier die For-Schleife
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=10G
 #SBATCH --time=5:00:00
-#SBATCH --job-name=profiling
-#SBATCH --output=profiling.out
-#SBATCH --error=profiling.err
+#SBATCH --job-name=bowtie
+#SBATCH --output=bowtie.out
+#SBATCH --error=bowtie.err
 #SBATCH --partition=base
 #SBATCH --reservation=biol217
 
@@ -401,14 +347,47 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
 
-cd /work_beegfs/sunam238/Metagenomics/5_anvio_profiles
+anvi-interactive -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C YOUR_COLLECTION
+```
+-----
 
-mkdir /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling
+# Day 4 (but really Day 3 continued)
 
-for i in `ls *.sorted.bam | cut -d "." -f 1`; do anvi-profile -i "$i".bam.sorted.bam -c ../3_coassembly/contigs.db -o /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/profiling/”$i”; done
+
+Day 3 continued
+
+
+anvi-display provides basic statistics of the contigs database, aiding in the assessment of the assembly output and enabling estimation of the number of bacterial and archaeal genomes that can be recovered.
+
+```
+module load gcc12-env/12.1.0
+module load miniconda3/4.12.0
+conda activate anvio-8
+
+anvi-display-contigs-stats contigs.db
 ```
 
-nächster Schritt: Verschmelzen der Anvi-Profile von verschiedenen Samples zu einem einzigen Profil:
+
+(Dieser command ist abhängig davon, was man im interactive mode runnen möchte und muss demnach geändert bleiben. Der Rest des Skriptes ist fix und kann für andere Visualisierungen verwendet werden.)
+
+Neues Terminal öffnen!
+
+ssh -L 8060:localhost:8080 sunam238@caucluster-old.rz.uni-kiel.de
+ssh -L 8080:localhost:8080 node238
+
+Internetbrowser öffnen und folgendes kopieren: 
+http://127.0.0.1:8060 oder http://127.0.0.1:8080
+
+anvi-display-contigs-stats contigs.db
+(without srun, das klappt auch)
+
+### Binning mit ANVI´O
+
+
+ANVI´O: ANalysis and Visualization platform for microbial ´Omics
+
+Online-Tutorial, wenn ich verwirrt bin: https://merenlab.org/2016/06/22/anvio-tutorial-v2/
+
 
 ```
 #!/bin/bash
@@ -430,12 +409,13 @@ cd /work_beegfs/sunam238/Metagenomics/
 
 anvi-merge ./5_anvio_profiles/profiling/map130305/PROFILE.db ./5_anvio_profiles/profiling/map130305/PROFILE.db ./5_anvio_profiles/profiling/map130708/PROFILE.db -o ./5_anvio_profiles/profiling/merged_profiles -c ./3_coassembly/contigs.db --enforce-hierarchical-clustering 
 ```
-/5_anvio_profiles/profiling/map130305/
-/5_anvio_profiles/profiling/map130527/
-/5_anvio_profiles/profiling/map130708/
 
 
-# danach kann mit dem Binning begonnen werden:
+# Binning with METABAT and MAXBIN2
+
+Finally, genome binning was performed utilizing Metabat2 and MaxBin2.
+
+
 
 ```
 #!/bin/bash
@@ -482,19 +462,28 @@ anvi-cluster-contigs -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC
 
 anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o MAXBIN2 -C MAXBIN2
 ```
+Number of Archaea bins from MetaBAT2: 3
+Number of Archaea bins from Maxbin2: 2
+
 
 ### MAGs Quality Estimation
 
+The completeness and contamination levels of the genomes were estimated to assess the quality of the bins. This evaluation was performed using anvi-estimate-genome-completeness.
+
 ```
+cd /work_beegfs/sunam238/Metagenomics/
 anvi-estimate-genome-completeness -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -C METABAT2
 ```
 
 ```
+cd /work_beegfs/sunam238/Metagenomics/
 anvi-estimate-genome-completeness -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db --list-collections
 ```
 
 
+The data required for this assessment was already available in the HTML file generated from binning.
 
+Subsequently, the results were visualized and evaluated using anvi-interactive. This tool allowed for manual inspection and manipulation of bins.
 ```
 module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
@@ -502,9 +491,27 @@ conda activate anvio-8
 
 anvi-interactive -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -C YOUR_COLLECTION
 ```
+Which binning strategy gives the best quality for the ARCHAEA bins?
+***METABAT works with 375 contigs creating 48 bins while MAXBIN works with 1381 contigs and makes 69 bins. Out of these 69 bins, one is an Archaea bin. METABAT on the other hand, has 3 Archaea bins. In order to say, which bin gives better quality Archaea bins, the parameter Completion has to be looked over for the Archaea bins for each binning type. MAXBIN_10 has a completion of 96.05%, METABAT_14, METABAT_8 and METABAT_39 have completions of 43.68%, 97.37%, and 50.00%.  ***
+How many Archaea bins does one get that are of high quality? How many Bacteria bins does one get that are of High Quality?
+***Bins that are of high quality are those with a completion over 90% percent and a contamination less than 5%. METABAT_8 would be the only high quality bin with 97.37% completion and about 5% redundancy.***
+
+Archaea bins found:
+
+MAXBIN_10 : Compl. 96.05%} from displayed summary
+MAXBIN_10: Compl. 96.05%
+MAXBIN_22: Compl. 0%
 
 
-# Day 4
+
+METABAT_8 : Compl. 97.37% 
+METABAT_14 : Compl. 43.68%
+METABAT_39: Compl. 50 %} from displayed summary
+METABAT_19 : 97.37%
+METABAT_23 : 39.47%
+METABAT_41 : 50.00%
+
+# Day 4 ()
 
 ```
 #!/bin/bash

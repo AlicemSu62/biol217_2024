@@ -42,6 +42,7 @@ The initial step involved formatting fasta sequence IDs using anvi'o to ensure s
 
 Following this, raw reads were mapped onto assembled contigs using Bowtie2, with prior indexing of the mapping reference fasta file to expedite the mapping process.
 
+
 Anvi'o was then employed to preprocess contigs data, involving computations of k-mer frequencies, soft-splitting of contigs longer than 20,000 bp, and identification of open reading frames using Prodigal.
 
 Subsequent Hidden Markov Model (HMM) searches on contigs were performed using anvi'o to identify genes with known functions, leveraging multiple default bacterial single-copy core gene collections to aid in gene hit identification.
