@@ -638,9 +638,10 @@ gunc plot -d GUNC_new/diamond_output/METABAT__19-contigs.diamond.progenomes_2.1.
 
 Questions
 Do you get bins that are chimeric?
-***Dont know yet***
+***Considering the clade seperation score, we do not have really chimeric bins. For our bins the CSS always stays near to 0 indicating abscence of contamination. One higher CSS with 0.39 could be observed for the bin of Methanoculleus sp012797575 on class level suggesting some contamination. If a genome passes GUNC analysis, it indicates a low likelihood of chimerism, or that chimerism may not be detectable, particularly when its reference representation (RRS) is low. A genome is deemed to pass if its clade separation score is less than or equal to 0.45, a cutoff established based on simulated genomes (Orakov et al. 2021). Since for every bin all values of pass.GUNG are true, no chimeric bins are occuring.***
 hint: look at the CSS score (explained in the lecture) and the column PASS GUNC in the tables outputs per bin in your gunc_output folder.
 In your own words (2 sentences max), explain what is a chimeric bin.
+***Misassembly results from incorrectly piecing together genetic fragments from different sources, leading to chimeric contigs, while mis-binning occurs when fragments from separate sources are mistakenly grouped into the same genetic bin, resulting in chimeric genomes. Mis-binning is expected to be the primary issue, and evaluating genome quality involves assessing fragmentation, completeness, and contamination using ubiquitous and single-copy marker genes to gauge overall assembly quality (Orakov et al. 2021).***
 
 The Clade Separation Score (CSS) is a metric designed to quantify the diversity of taxonomic assignments within individual contigs within a genome assembly. It is normalized relative to the overall taxonomic diversity across the entire genome assembly and further normalized based on the expected entropy when there is no discernible relationship between taxonomic labels across contigs. The CSS value ranges between 0 and 1, where a value closer to 1 indicates high diversity of taxonomic assignments within contigs, even if they are internally homogeneous but disagree with each other. Conversely, a genome with all genes consistently assigned to the same taxonomy, indicating absence of contamination, will be assigned a CSS score of 0.
 
@@ -660,14 +661,71 @@ module load gcc12-env/12.1.0
 module load miniconda3/4.12.0
 conda activate anvio-8
 
-cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT
+cd /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/ARCHAEA_BIN_REFINEMENT_new
 
-anvi-run-scg-taxonomy -c ./CC/4_mapping/contigs.db -T 20 -P 2
-
-
-
+anvi-run-scg-taxonomy -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -T 20 -P 2
 ```
 
+it gave following (friendly) warning and table:
+
+**Please take a careful look at the table below. It shows the number of sequences
+found in the contigs database for a given SCG, and how many of them actually was
+annotated based on sequences in GTDB. The discrepancy between these two numbers
+can occur due to multiple reasons. You may have bacterial or archaeal sequences
+in your data that are way too novel to hit anything in the GTDB above the
+percent identity cutoff set by the parameter`--min-percent-identity` to report
+alignments (which is set to 90.0 in the current run). Or, you may have a lot of
+eukaryotic organisms, single-copy core gene sequences of which may have no
+representation in the GTDB, in which case decreasing `--min-percent-identity`
+will only give you erronous results.**
+
++----------------+-----------------+---------------------+----------------------+
+| SCG            |  in_contigs_db  |  in_search_results  |  percent_annotation  |
++================+=================+=====================+======================+
+| Ribosomal_L1   |       69        |         68          |         98.6         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L13  |       57        |         52          |         91.2         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L16  |       76        |         76          |         100          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L17  |       56        |         42          |          75          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L2   |       73        |         68          |         93.2         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L20  |       57        |         57          |         100          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L21p |       55        |         52          |         94.5         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L22  |       70        |         67          |         95.7         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L27A |       66        |         60          |         90.9         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L3   |       74        |         70          |         94.6         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L4   |       74        |         72          |         97.3         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L6   |       78        |         73          |         93.6         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_L9_C |       60        |         59          |         98.3         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S11  |       71        |         71          |         100          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S2   |       65        |         65          |         100          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S20p |       42        |         40          |         95.2         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S3_C |       64        |         63          |         98.4         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S6   |       58        |         57          |         98.3         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S7   |       78        |         76          |         97.4         |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S8   |       72        |         72          |         100          |
++----------------+-----------------+---------------------+----------------------+
+| Ribosomal_S9   |       63        |         61          |         96.8         |
++----------------+-----------------+---------------------+----------------------+
+| ribosomal_L24  |       71        |         67          |         94.4         |
++----------------+-----------------+---------------------+----------------------+
 
 ```
 #!/bin/bash
@@ -694,8 +752,6 @@ anvi-estimate-scg-taxonomy -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles
 anvi-estimate-scg-taxonomy -c ./CC/4_mapping/contigs.db -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db --metagenome-mode --compute-scg-coverages --update-profile-db-with-taxonomy > temp.txt
 
 anvi-summarize -p ./CC/5_anvio_profiles/merged_profiles/PROFILE.db -c ./CC/4_mapping/contigs.db -o ./CC/5_anvio_profiles/merged_profiles/SUMMARY_METABAT2 -C METABAT
-
-
 
 ```
 
