@@ -725,7 +725,12 @@ will only give you erronous results.**
 | Ribosomal_S9   |       63        |         61          |         96.8         |
 +----------------+-----------------+---------------------+----------------------+
 | ribosomal_L24  |       71        |         67          |         94.4         |
-+----------------+-----------------+---------------------+----------------------+
++----------------+-----------------+---------------------+----------------------+#
+
+
+```
+anvi-refine -c /work_beegfs/sunam238/Metagenomics/CC/4_mapping/contigs.db -C METABAT -p /work_beegfs/sunam238/Metagenomics/CC/5_anvio_profiles/merged_profiles/PROFILE.db --bin-id METABAT__19
+```
 
 ```
 #!/bin/bash
@@ -760,6 +765,15 @@ anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_
 anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/map130527.sam.bam.sorted.bam 
 
 anvi-script-get-coverage-from-bam -b /work_beegfs/sunam238/Metagenomics/5_anvio_profiles/map130708.sam.bam.sorted.bam 
+
+```
+anvi-estimate-scg-taxonomy -c /work_beegfs/sunam2es/profile.db --metagenome-mode --compute-scg-coverages --update-profile-db-with-taxonomy
+```
+Questions
+Did you get a species assignment to the 
+ bins previously identified?
+Does the HIGH-QUALITY assignment of the bin need revision?
+hint: MIMAG quality tiers https://www.nature.com/articles/nbt.3893
 
 # Day6
 
